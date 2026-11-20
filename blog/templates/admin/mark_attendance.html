@@ -1,0 +1,74 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="content-section">
+  <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-4">
+    <h2 class="mb-0">Mark Attendance</h2>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary btn-sm">&larr; Dashboard</a>
+  </div>
+
+  <!-- Filter by Subject & Date -->
+  <form method="GET" action="{{ url_for('admin.mark_attendance') }}" class="form-row align-items-end mb-4">
+    <div class="form-group col-md-6 mb-2 mb-md-0">
+      <label class="small font-weight-bold">Subject</label>
+      <select name="subject_id" class="form-control form-control-sm">
+        {% for sub in subjects %}
+          <option value="{{ sub.id }}" {% if selected_subject and sub.id == selected_subject.id %}selected{% endif %}>
+            {{ sub.code }} - {{ sub.name }} ({{ sub.course.name }})
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group col-md-4 mb-2 mb-md-0">
+      <label class="small font-weight-bold">Date</label>
+      <input type="date" name="date" value="{{ selected_date }}" class="form-control form-control-sm">
+    </div>
+    <div class="form-group col-md-2 mb-0">
+      <button type="submit" class="btn btn-outline-info btn-sm btn-block">Load Class</button>
+    </div>
+  </form>
+
+  {% if selected_subject and students %}
+  <form method="POST">
+    {% if csrf_token %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endif %}
+
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead class="thead-light">
+          <tr>
+            <th>Roll No</th>
+            <th>Student Name</th>
+            <th class="text-center">Present</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for student in students %}
+          {% set record = existing_map.get(student.id) %}
+          <tr>
+            <td><strong>{{ student.roll_number }}</strong></td>
+            <td>{{ student.full_name }}</td>
+            <td class="text-center">
+              <div class="custom-control custom-checkbox d-inline-block">
+                <input type="checkbox"
+                       class="custom-control-input"
+                       id="stu_{{ student.id }}"
+                       name="present_students"
+                       value="{{ student.id }}"
+                       {% if record and record.is_present %}checked{% endif %}>
+                <label class="custom-control-label" for="stu_{{ student.id }}"></label>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <button type="submit" class="btn btn-success mt-2">Save Attendance</button>
+  </form>
+  {% elif selected_subject %}
+    <p class="text-muted text-center py-4">No active students enrolled in {{ selected_subject.course.name }} yet.</p>
+  {% else %}
+    <p class="text-muted text-center py-4">Please add a Course and Subject first.</p>
+  {% endif %}
+</div>
+{% endblock content %}

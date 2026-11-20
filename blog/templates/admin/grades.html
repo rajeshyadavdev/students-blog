@@ -1,0 +1,84 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="content-section">
+  <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-4">
+    <h2 class="mb-0">Record Exam Grades</h2>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary btn-sm">&larr; Dashboard</a>
+  </div>
+
+  <form method="POST" class="mb-4" novalidate>
+    {{ form.hidden_tag() }}
+    <div class="form-row">
+      <div class="form-group col-md-6">
+        {{ form.student_id.label(class="small font-weight-bold") }}
+        {{ form.student_id(class="form-control form-control-sm" + (" is-invalid" if form.student_id.errors else "")) }}
+        {% for error in form.student_id.errors %}
+        <div class="invalid-feedback">{{ error }}</div>
+        {% endfor %}
+      </div>
+      <div class="form-group col-md-6">
+        {{ form.subject_id.label(class="small font-weight-bold") }}
+        {{ form.subject_id(class="form-control form-control-sm" + (" is-invalid" if form.subject_id.errors else "")) }}
+        {% for error in form.subject_id.errors %}
+        <div class="invalid-feedback">{{ error }}</div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group col-md-4">
+        {{ form.exam_type.label(class="small font-weight-bold") }}
+        {{ form.exam_type(class="form-control form-control-sm") }}
+      </div>
+      <div class="form-group col-md-4">
+        {{ form.marks_obtained.label(class="small font-weight-bold") }}
+        {{ form.marks_obtained(class="form-control form-control-sm" + (" is-invalid" if form.marks_obtained.errors else
+        ""), step="0.5") }}
+        {% for error in form.marks_obtained.errors %}
+        <div class="invalid-feedback">{{ error }}</div>
+        {% endfor %}
+      </div>
+      <div class="form-group col-md-4">
+        {{ form.max_marks.label(class="small font-weight-bold") }}
+        {{ form.max_marks(class="form-control form-control-sm" + (" is-invalid" if form.max_marks.errors else ""),
+        step="0.5") }}
+        {% for error in form.max_marks.errors %}
+        <div class="invalid-feedback">{{ error }}</div>
+        {% endfor %}
+      </div>
+    </div>
+
+    {{ form.submit(class="btn btn-info btn-sm") }}
+  </form>
+
+  <h5 class="border-bottom pb-2 mb-3">Recently Uploaded Grades</h5>
+  <div class="table-responsive">
+    <table class="table table-sm table-hover">
+      <thead class="thead-light">
+        <tr>
+          <th>Roll No</th>
+          <th>Student</th>
+          <th>Subject</th>
+          <th>Exam</th>
+          <th class="text-right">Score</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for g in recent_grades %}
+        <tr>
+          <td><strong>{{ g.student.roll_number }}</strong></td>
+          <td>{{ g.student.full_name }}</td>
+          <td>{{ g.subject.code }} - {{ g.subject.name }}</td>
+          <td><span class="badge badge-light border">{{ g.exam_type }}</span></td>
+          <td class="text-right font-weight-bold">{{ '%g' % g.marks_obtained }} / {{ '%g' % g.max_marks }}</td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="5" class="text-center text-muted py-3">No grades recorded yet.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock content %}

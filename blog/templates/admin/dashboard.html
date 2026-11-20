@@ -1,0 +1,68 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="content-section">
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+    <h2 class="mb-2 mb-md-0">Admin Dashboard</h2>
+    <div>
+      <a href="{{ url_for('admin.manage_users') }}" class="btn btn-outline-info btn-sm mr-1">Users</a>
+      <a href="{{ url_for('admin.manage_students') }}" class="btn btn-outline-primary btn-sm mr-1">Students</a>
+      <a href="{{ url_for('admin.manage_courses') }}" class="btn btn-outline-dark btn-sm mr-1">Courses</a>
+      <a href="{{ url_for('admin.manage_posts') }}" class="btn btn-outline-secondary btn-sm">Posts</a>
+    </div>
+  </div>
+
+  <!-- Summary Stat Cards -->
+  <div class="row mb-4">
+    <div class="col-md-6 mb-3 mb-md-0">
+      <div class="card border-info">
+        <div class="card-body text-center">
+          <h6 class="text-muted text-uppercase">Total Users</h6>
+          <h2 class="display-4 font-weight-bold text-info mb-0">{{ total_users }}</h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card border-secondary">
+        <div class="card-body text-center">
+          <h6 class="text-muted text-uppercase">Total Posts</h6>
+          <h2 class="display-4 font-weight-bold text-secondary mb-0">{{ total_posts }}</h2>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Users -->
+  <h5 class="border-bottom pb-2 mb-3">Recent Signups</h5>
+  <ul class="list-group mb-4">
+    {% for user in recent_users %}
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <div>
+          <strong>{{ user.username }}</strong>
+          <small class="text-muted ml-2">{{ user.email }}</small>
+        </div>
+        <span class="badge badge-pill {% if user.role.value == 'admin' %}badge-danger{% elif user.role.value == 'moderator' %}badge-warning{% elif user.role.value == 'student' %}badge-info{% else %}badge-secondary{% endif %}">
+          {{ user.role.value | capitalize }}
+        </span>
+      </li>
+    {% else %}
+      <li class="list-group-item text-muted">No users found.</li>
+    {% endfor %}
+  </ul>
+
+  <!-- Recent Posts -->
+  <h5 class="border-bottom pb-2 mb-3">Recent Posts</h5>
+  <ul class="list-group">
+    {% for post in recent_posts %}
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <div>
+          <a href="{{ url_for('posts.post', post_id=post.id) }}" class="font-weight-bold">{{ post.title }}</a>
+          <small class="text-muted d-block">by {{ post.author.username }} on {{ post.date_posted.strftime('%Y-%m-%d') }}</small>
+        </div>
+        <a href="{{ url_for('posts.post', post_id=post.id) }}" class="btn btn-sm btn-outline-secondary">View</a>
+      </li>
+    {% else %}
+      <li class="list-group-item text-muted">No posts yet.</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock content %}

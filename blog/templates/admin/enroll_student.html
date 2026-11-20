@@ -1,0 +1,75 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="content-section">
+  <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-4">
+    <h2 class="mb-0">Enroll Student</h2>
+    <a href="{{ url_for('admin.manage_students') }}" class="btn btn-outline-secondary btn-sm">&larr; All Students</a>
+  </div>
+
+  {% if not form.course_id.choices %}
+    <div class="alert alert-warning">
+      No courses exist yet. Please <a href="{{ url_for('admin.manage_courses') }}" class="alert-link">create a course</a> before enrolling students.
+    </div>
+  {% elif not form.user_id.choices %}
+    <div class="alert alert-info">
+      All eligible registered users are already enrolled as students.
+    </div>
+  {% else %}
+    <form method="POST" novalidate>
+      {{ form.hidden_tag() }}
+
+      <div class="form-group">
+        {{ form.user_id.label(class="form-control-label") }}
+        {{ form.user_id(class="form-control" + (" is-invalid" if form.user_id.errors else "")) }}
+        {% for error in form.user_id.errors %}
+          <div class="invalid-feedback">{{ error }}</div>
+        {% endfor %}
+        <small class="form-text text-muted">Only registered users not yet enrolled as students appear here.</small>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group col-md-6">
+          {{ form.roll_number.label(class="form-control-label") }}
+          {{ form.roll_number(class="form-control" + (" is-invalid" if form.roll_number.errors else "")) }}
+          {% for error in form.roll_number.errors %}
+            <div class="invalid-feedback">{{ error }}</div>
+          {% endfor %}
+        </div>
+        <div class="form-group col-md-6">
+          {{ form.full_name.label(class="form-control-label") }}
+          {{ form.full_name(class="form-control" + (" is-invalid" if form.full_name.errors else "")) }}
+          {% for error in form.full_name.errors %}
+            <div class="invalid-feedback">{{ error }}</div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group col-md-5">
+          {{ form.course_id.label(class="form-control-label") }}
+          {{ form.course_id(class="form-control" + (" is-invalid" if form.course_id.errors else "")) }}
+          {% for error in form.course_id.errors %}
+            <div class="invalid-feedback">{{ error }}</div>
+          {% endfor %}
+        </div>
+        <div class="form-group col-md-3">
+          {{ form.batch_year.label(class="form-control-label") }}
+          {{ form.batch_year(class="form-control" + (" is-invalid" if form.batch_year.errors else ""), placeholder="2026") }}
+          {% for error in form.batch_year.errors %}
+            <div class="invalid-feedback">{{ error }}</div>
+          {% endfor %}
+        </div>
+        <div class="form-group col-md-4">
+          {{ form.phone.label(class="form-control-label") }}
+          {{ form.phone(class="form-control" + (" is-invalid" if form.phone.errors else ""), placeholder="e.g. 9876543210") }}
+          {% for error in form.phone.errors %}
+            <div class="invalid-feedback">{{ error }}</div>
+          {% endfor %}
+        </div>
+      </div>
+
+      {{ form.submit(class="btn btn-info") }}
+    </form>
+  {% endif %}
+</div>
+{% endblock content %}

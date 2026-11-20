@@ -1,0 +1,54 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="content-section">
+  <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
+    <div>
+      <h2 class="mb-0">My Exam Grades</h2>
+      <small class="text-muted">{{ student.full_name }} ({{ student.roll_number }})</small>
+    </div>
+    <a href="{{ url_for('students.dashboard') }}" class="btn btn-outline-secondary btn-sm">&larr; Dashboard</a>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead class="thead-light">
+        <tr>
+          <th>Sem</th>
+          <th>Subject</th>
+          <th>Exam Type</th>
+          <th>Marks</th>
+          <th class="text-right">Result</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for g in grades %}
+        {% set pct = g.percentage if g.percentage is defined else (((g.marks_obtained / g.max_marks) * 100) | round(1)
+        if g.max_marks else 0) %}
+        <tr>
+          <td class="align-middle">{{ g.subject.semester }}</td>
+          <td class="align-middle">
+            <strong>{{ g.subject.code }}</strong><br>
+            <small class="text-muted">{{ g.subject.name }}</small>
+          </td>
+          <td class="align-middle"><span class="badge badge-light border">{{ g.exam_type }}</span></td>
+          <td class="align-middle">{{ '%g' % g.marks_obtained }} / {{ '%g' % g.max_marks }}</td>
+          <td
+            class="align-middle text-right font-weight-bold {% if pct >= 40 %}text-success{% else %}text-danger{% endif %}">
+            {{ pct }}%
+            {% if g.letter_grade is defined %}
+            <span class="badge {% if pct >= 40 %}badge-success{% else %}badge-danger{% endif %} ml-1">{{ g.letter_grade
+              }}</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="5" class="text-center text-muted py-4">No exam results available yet.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock content %}

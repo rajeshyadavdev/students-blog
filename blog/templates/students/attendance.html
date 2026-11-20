@@ -1,0 +1,116 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="content-section">
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
+    <div>
+      <h2 class="mb-0">My Attendance</h2>
+      <small class="text-muted">{{ student.full_name }} ({{ student.roll_number }})</small>
+    </div>
+    <a href="{{ url_for('students.dashboard') }}" class="btn btn-outline-secondary btn-sm">&larr; Dashboard</a>
+  </div>
+
+  <!-- Overall Attendance Progress Banner -->
+  {% set overall = student.attendance_percentage %}
+  <div class="alert alert-light border mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-1">
+      <strong>Overall Attendance</strong>
+      <span class="font-weight-bold {% if overall >= 75 %}text-success{% else %}text-danger{% endif %}">
+        {{ overall }}%
+      </span>
+    </div>
+    <div class="progress" style="height: 10px;">
+      <div class="progress-bar {% if overall >= 75 %}bg-success{% else %}bg-warning{% endif %}" role="progressbar"
+        data-width="{{ overall }}" aria-valuenow="{{ overall }}" aria-valuemin="0" aria-valuemax="100">
+      </div>
+    </div>
+    <small class="text-muted d-block mt-1">Minimum required attendance is typically 75%.</small>
+  </div>
+
+  <!-- Subject-Wise Summary Table -->
+  <h5 class="mb-3">Subject-Wise Summary</h5>
+  <div class="table-responsive mb-4">
+    <table class="table table-hover">
+      <thead class="thead-light">
+        <tr>
+          <th>Sem</th>
+          <th>Subject</th>
+          <th class="text-center">Attended / Total</th>
+          <th style="width: 30%;">Percentage</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in subject_stats %}
+        <tr>
+          <td class="align-middle">{{ item.subject.semester }}</td>
+          <td class="align-middle">
+            <strong>{{ item.subject.code }}</strong>
+            <small class="text-muted d-block">{{ item.subject.name }}</small>
+          </td>
+          <td class="align-middle text-center">{{ item.attended }} / {{ item.total }}</td>
+          <td class="align-middle">
+            <div class="d-flex align-items-center">
+              <div class="progress flex-grow-1 mr-2" style="height: 8px;">
+                <div
+                  class="progress-bar {% if item.percentage >= 75 %}bg-success{% elif item.percentage >= 50 %}bg-warning{% else %}bg-danger{% endif %}"
+                  role="progressbar" data-width="{{ item.percentage }}" aria-valuenow="{{ item.percentage }}"
+                  aria-valuemin="0" aria-valuemax="100">
+                </div>
+              </div>
+              <small class="font-weight-bold">{{ item.percentage }}%</small>
+            </div>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="4" class="text-center text-muted py-4">No subjects found for your course yet.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Recent Attendance Log -->
+  <h5 class="mb-3">Recent Attendance Log (Last 20 Classes)</h5>
+  <div class="table-responsive">
+    <table class="table table-sm table-hover">
+      <thead class="thead-light">
+        <tr>
+          <th>Date</th>
+          <th>Subject</th>
+          <th class="text-right">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for record in recent_records %}
+        <tr>
+          <td class="align-middle">{{ record.date.strftime('%b %d, %Y') }}</td>
+          <td class="align-middle">
+            <strong>{{ record.subject.code }}</strong> &ndash; {{ record.subject.name }}
+          </td>
+          <td class="align-middle text-right">
+            {% if record.is_present %}
+            <span class="badge badge-success">Present</span>
+            {% else %}
+            <span class="badge badge-danger">Absent</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="3" class="text-center text-muted py-3">No attendance records logged yet.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock content %}
+
+{% block scripts %}
+<script>
+  document.querySelectorAll('.progress-bar[data-width]').forEach(function (bar) {
+    bar.style.width = bar.dataset.width + '%';
+  });
+</script>
+{% endblock scripts %}

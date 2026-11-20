@@ -1,0 +1,121 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="content-section">
+  <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+    <h2 class="mb-0">All Students</h2>
+    <div>
+      <a href="{{ url_for('admin.enroll_student') }}" class="btn btn-info btn-sm mr-1">+ Enroll Student</a>
+      <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary btn-sm">&larr; Dashboard</a>
+    </div>
+  </div>
+
+  <!-- Search & Course Filter Bar -->
+  <form action="{{ url_for('admin.manage_students') }}" method="GET" class="form-row mb-3">
+    <div class="col-md-6 mb-2 mb-md-0">
+      <input type="text" name="q" class="form-control form-control-sm"
+        placeholder="Search by roll number, name, or email..." value="{{ q or '' }}">
+    </div>
+    <div class="col-md-4 mb-2 mb-md-0">
+      <select name="course_id" class="form-control form-control-sm">
+        <option value="">All Courses</option>
+        {% for course in courses %}
+        <option value="{{ course.id }}" {% if selected_course_id==course.id %}selected{% endif %}>
+          {{ course.name }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2 d-flex">
+      <button type="submit" class="btn btn-outline-info btn-sm flex-grow-1 mr-1">Filter</button>
+      {% if q or selected_course_id %}
+      <a href="{{ url_for('admin.manage_students') }}" class="btn btn-outline-secondary btn-sm">Reset</a>
+      {% endif %}
+    </div>
+  </form>
+
+  <!-- Students Table -->
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead class="thead-light">
+        <tr>
+          <th>Roll No</th>
+          <th>Student</th>
+          <th>Course &amp; Batch</th>
+          <th>Attendance</th>
+          <th>Status</th>
+          <th class="text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for student in students.items %}
+        <tr>
+          <td><strong>{{ student.roll_number }}</strong></td>
+          <td>
+            <div class="font-weight-bold">{{ student.full_name }}</div>
+            <small class="text-muted">{{ student.user.email }}{% if student.phone %} &bull; {{ student.phone }}{% endif
+              %}</small>
+          </td>
+          <td>
+            <div>{{ student.course.name }}</div>
+            <small class="text-muted">Batch {{ student.batch_year }}</small>
+          </td>
+          <td>
+            <span
+              class="font-weight-bold {% if student.attendance_percentage >= 75 %}text-success{% else %}text-danger{% endif %}">
+              {{ student.attendance_percentage }}%
+            </span>
+          </td>
+          <td>
+            {% if student.is_active %}
+            <span class="badge badge-success">Active</span>
+            {% else %}
+            <span class="badge badge-secondary">Inactive</span>
+            {% endif %}
+          </td>
+          <td class="text-right text-nowrap">
+            <form action="{{ url_for('admin.toggle_student_status', student_id=student.id) }}" method="POST"
+              class="d-inline">
+              {% if csrf_token %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endif %}
+              <button type="submit" class="btn btn-outline-warning btn-sm mr-1">
+                {% if student.is_active %}Deactivate{% else %}Activate{% endif %}
+              </button>
+            </form>
+            <form action="{{ url_for('admin.unenroll_student', student_id=student.id) }}" method="POST" class="d-inline"
+              onsubmit="return confirm('Remove student profile for {{ student.full_name }} ({{ student.roll_number }})? Their user account will remain.');">
+              {% if csrf_token %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endif %}
+              <button type="submit" class="btn btn-outline-danger btn-sm">Remove</button>
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="6" class="text-center text-muted py-4">
+            No students found. <a href="{{ url_for('admin.enroll_student') }}">Enroll a student</a> to get started.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Bootstrap 4 Pagination -->
+  {% if students.pages > 1 %}
+  <nav aria-label="Student pagination" class="mt-3">
+    <ul class="pagination pagination-sm justify-content-center mb-0">
+      {% for page_num in students.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+      {% if page_num %}
+      <li class="page-item {% if students.page == page_num %}active{% endif %}">
+        <a class="page-link"
+          href="{{ url_for('admin.manage_students', page=page_num, q=q, course_id=selected_course_id) }}">
+          {{ page_num }}
+        </a>
+      </li>
+      {% else %}
+      <li class="page-item disabled"><span class="page-link">&hellip;</span></li>
+      {% endif %}
+      {% endfor %}
+    </ul>
+  </nav>
+  {% endif %}
+</div>
+{% endblock content %}

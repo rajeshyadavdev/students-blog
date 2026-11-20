@@ -1,0 +1,36 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: flask_blog
+      POSTGRES_USER: blog_user
+      POSTGRES_PASSWORD: strong_db_password_change_me
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U blog_user -d flask_blog"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      FLASK_APP: wsgi.py
+      FLASK_ENV: production
+      DATABASE_URL: postgresql://blog_user:strong_db_password_change_me@db:5432/flask_blog
+    volumes:
+      - profile_pics:/app/blog/static/profile_pic
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  profile_pics:

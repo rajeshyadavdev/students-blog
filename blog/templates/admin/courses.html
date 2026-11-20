@@ -1,0 +1,105 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="content-section">
+  <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-4">
+    <h2 class="mb-0">Courses &amp; Subjects</h2>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary btn-sm">&larr; Dashboard</a>
+  </div>
+
+  <div class="row">
+    <!-- Add Course Form -->
+    <div class="col-md-6 mb-4">
+      <div class="card h-100">
+        <div class="card-header font-weight-bold">Add New Course</div>
+        <div class="card-body">
+          <form method="POST" action="{{ url_for('admin.manage_courses') }}" novalidate>
+            {{ course_form.hidden_tag() }}
+            <div class="form-group">
+              {{ course_form.name.label(class="small font-weight-bold") }}
+              {{ course_form.name(class="form-control form-control-sm" + (" is-invalid" if course_form.name.errors else
+              ""), placeholder="e.g. B.Tech CSE") }}
+              {% for error in course_form.name.errors %}
+              <div class="invalid-feedback">{{ error }}</div>
+              {% endfor %}
+            </div>
+            <div class="form-group">
+              {{ course_form.duration_years.label(class="small font-weight-bold") }}
+              {{ course_form.duration_years(class="form-control form-control-sm" + (" is-invalid" if
+              course_form.duration_years.errors else "")) }}
+              {% for error in course_form.duration_years.errors %}
+              <div class="invalid-feedback">{{ error }}</div>
+              {% endfor %}
+            </div>
+            <div class="form-group">
+              {{ course_form.description.label(class="small font-weight-bold") }}
+              {{ course_form.description(class="form-control form-control-sm", rows="2") }}
+            </div>
+            {{ course_form.submit(class="btn btn-info btn-sm") }}
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Subject Form -->
+    <div class="col-md-6 mb-4">
+      <div class="card h-100">
+        <div class="card-header font-weight-bold">Add Subject to Course</div>
+        <div class="card-body">
+          {% if courses %}
+          <form method="POST" action="{{ url_for('admin.add_subject') }}" novalidate>
+            {{ subject_form.hidden_tag() }}
+            <div class="form-group">
+              {{ subject_form.course_id.label(class="small font-weight-bold") }}
+              {{ subject_form.course_id(class="form-control form-control-sm") }}
+            </div>
+            <div class="form-row">
+              <div class="form-group col-md-5">
+                {{ subject_form.code.label(class="small font-weight-bold") }}
+                {{ subject_form.code(class="form-control form-control-sm", placeholder="CS101") }}
+              </div>
+              <div class="form-group col-md-7">
+                {{ subject_form.semester.label(class="small font-weight-bold") }}
+                {{ subject_form.semester(class="form-control form-control-sm", placeholder="1") }}
+              </div>
+            </div>
+            <div class="form-group">
+              {{ subject_form.name.label(class="small font-weight-bold") }}
+              {{ subject_form.name(class="form-control form-control-sm", placeholder="Data Structures") }}
+            </div>
+            {{ subject_form.submit(class="btn btn-secondary btn-sm") }}
+          </form>
+          {% else %}
+          <p class="text-muted small mb-0">Create a course on the left first before adding subjects.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Existing Courses List -->
+  <h5 class="border-bottom pb-2 mb-3">Existing Programs</h5>
+  {% for course in courses %}
+  <div class="card mb-3">
+    <div class="card-body py-3">
+      <div class="d-flex justify-content-between align-items-center">
+        <h6 class="font-weight-bold mb-1">{{ course.name }}</h6>
+        <span class="badge badge-info">{{ course.duration_years }} Years ({{ course.duration_years * 2 }}
+          Semesters)</span>
+      </div>
+      <p class="text-muted small mb-2">{{ course.description }}</p>
+      <div>
+        {% for sub in course.subjects %}
+        <span class="badge badge-light border mr-1 mb-1">
+          Sem {{ sub.semester }}: <strong>{{ sub.code }}</strong> - {{ sub.name }}
+        </span>
+        {% else %}
+        <small class="text-muted">No subjects added yet.</small>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <p class="text-muted">No courses created yet.</p>
+  {% endfor %}
+</div>
+{% endblock content %}

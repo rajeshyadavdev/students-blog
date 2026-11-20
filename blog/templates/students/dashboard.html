@@ -1,0 +1,101 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="content-section">
+  <!-- Header & Navigation Links -->
+  <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
+    <div>
+      <h2 class="mb-0">{{ student.full_name }}</h2>
+      <small class="text-muted">
+        Roll No: <strong>{{ student.roll_number }}</strong> &bull;
+        {{ student.course.name }} (Batch {{ student.batch_year }})
+      </small>
+    </div>
+    <div class="text-nowrap">
+      <a href="{{ url_for('students.attendance') }}" class="btn btn-outline-info btn-sm mr-1">Attendance</a>
+      <a href="{{ url_for('students.grades') }}" class="btn btn-outline-secondary btn-sm mr-1">Grades</a>
+      <a href="{{ url_for('students.profile') }}" class="btn btn-outline-dark btn-sm">Edit Profile</a>
+    </div>
+  </div>
+
+  <!-- Summary Stat Cards -->
+  <div class="row mb-4">
+    <div class="col-md-4 mb-3 mb-md-0">
+      <div class="card border-info h-100">
+        <div class="card-body text-center">
+          <h6 class="text-muted text-uppercase small">Overall Attendance</h6>
+          <h2
+            class="font-weight-bold {% if student.attendance_percentage >= 75 %}text-success{% else %}text-danger{% endif %} mb-0">
+            {{ student.attendance_percentage }}%
+          </h2>
+          <small class="text-muted">
+            {% if student.attendance_percentage >= 75 %}Good standing{% else %}Below 75% requirement{% endif %}
+          </small>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4 mb-3 mb-md-0">
+      <div class="card border-secondary h-100">
+        <div class="card-body text-center">
+          <h6 class="text-muted text-uppercase small">Enrolled Course</h6>
+          <h5 class="font-weight-bold text-dark mt-2 mb-1">{{ student.course.name }}</h5>
+          <small class="text-muted">{{ student.course.duration_years }} Years Program</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card border-secondary h-100">
+        <div class="card-body text-center">
+          <h6 class="text-muted text-uppercase small">Enrollment Status</h6>
+          <div class="mt-2">
+            {% if student.is_active %}
+            <span class="badge badge-success px-3 py-2">Active Student</span>
+            {% else %}
+            <span class="badge badge-secondary px-3 py-2">Inactive</span>
+            {% endif %}
+          </div>
+          <small class="text-muted d-block mt-1">Phone: {{ student.phone or 'Not set' }}</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Exam Results -->
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <h5 class="mb-0">Recent Exam Results</h5>
+    <a href="{{ url_for('students.grades') }}" class="small">View All &rarr;</a>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-sm table-hover">
+      <thead class="thead-light">
+        <tr>
+          <th>Subject</th>
+          <th>Exam</th>
+          <th>Score</th>
+          <th class="text-right">Percentage</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for grade in recent_grades %}
+        {% set pct = ((grade.marks_obtained / grade.max_marks) * 100) | round(1) %}
+        <tr>
+          <td>
+            <strong>{{ grade.subject.code }}</strong> - {{ grade.subject.name }}
+          </td>
+          <td><span class="badge badge-light border">{{ grade.exam_type }}</span></td>
+          <td>{{ grade.marks_obtained }} / {{ grade.max_marks }}</td>
+          <td class="text-right font-weight-bold {% if pct >= 40 %}text-success{% else %}text-danger{% endif %}">
+            {{ pct }}%
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="4" class="text-center text-muted py-3">No grades uploaded yet.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock content %}
