@@ -1,5 +1,7 @@
+import os
 from urllib.parse import urlparse
 
+from dotenv import load_dotenv
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 from sqlalchemy import func, select
@@ -16,6 +18,8 @@ from blog.users.forms import (
 from blog.users.models import User
 from blog.users.utils import save_picture, send_reset_email
 
+load_dotenv()
+
 user_bp = Blueprint("users", __name__)
 
 
@@ -25,6 +29,8 @@ def register():
         return redirect(url_for("main.home"))
     form = RegistrationForm()
     if form.validate_on_submit():
+        
+            
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode(
             "utf-8"
         )
@@ -33,6 +39,9 @@ def register():
             email=form.email.data.strip().lower(),
             password=hashed_password,
         )
+        admin_email = os.getenv("ADMIN_EMAIL", "").strip().lower()
+        if user.email == admin_email:
+            user.is_admin = True
         db.session.add(user)
         db.session.commit()
         flash("Your account has been created! You are now able to sign in.", "success")
