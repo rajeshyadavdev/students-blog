@@ -25,24 +25,26 @@ def role_required(*roles: UserRole):
     return decorator
 
 
-def save_picture(form_picture):
+def save_picture(form_picture, old_picture=None):
     random_hex = secrets.token_hex(8)
     _, file_ext = os.path.splitext(form_picture.filename)
     picture_fn = random_hex + file_ext
 
-    # 1. Point to the main app's static directory, not the users blueprint folder
     picture_dir = os.path.join(current_app.root_path, "static", "profile_pic")
-
-    # 2. Create ONLY the folder, not the filename
     os.makedirs(picture_dir, exist_ok=True)
 
-    # 3. Join the folder and filename afterward
-    picture_path = os.path.join(picture_dir, picture_fn)
+    if old_picture and old_picture != "default.jpg":
+        old_path = os.path.join(picture_dir, old_picture)
+        if os.path.exists(old_path):
+            try:
+                os.remove(old_path)
+            except OSError as e:
+                current_app.logger.warning(f"Old pic delete nahi hua {old_path}: {e}")
 
+    picture_path = os.path.join(picture_dir, picture_fn)
     output_size = (120, 120)
     i = Image.open(form_picture)
     i.thumbnail(output_size)
-
     i.save(picture_path)
     return picture_fn
 
